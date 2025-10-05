@@ -11,5 +11,5 @@ class KermitKtorLogger: Logger {
     }
 }
 
-fun co.touchlab.kermit.Logger.logger() = co.touchlab.kermit.Logger.withTag(APP_TAG)
+fun logger() = co.touchlab.kermit.Logger.withTag(APP_TAG)
 

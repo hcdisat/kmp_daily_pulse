@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.hcdisat.dailypulse.about.AboutScreen
 import com.hcdisat.dailypulse.articles.ArticlesScreen
-import com.hcdisat.dailypulse.articles.domain.ArticlesState
+import com.hcdisat.dailypulse.articles.presentation.ArticlesState
 import kotlinx.serialization.Serializable
 
 sealed interface Route {

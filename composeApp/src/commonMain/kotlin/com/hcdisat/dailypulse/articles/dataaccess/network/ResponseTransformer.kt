@@ -7,11 +7,15 @@ fun NewsResponse.toArticles(): List<Article> {
         .filter { it.description != null && it.urlToImage != null }
         .mapIndexed { index, article ->
             Article(
-                id = index.toLong(),
+                id = article.source.id ?: index.toString(),
+                name = article.source.name,
+                author = article.author,
+                content = article.content,
                 title = article.title,
-                desc = article.description.orEmpty(),
-                date = article.publishedAt.substringBefore("T"),
-                imageUrl = article.urlToImage.orEmpty()
+                description = article.description,
+                publishedAt = article.publishedAt,
+                urlToImage = article.urlToImage,
+                url = article.url
             )
         }
 }

@@ -50,6 +50,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.bundles.ktor.core)
             implementation(libs.bundles.koin)
+            implementation(libs.kotlinx.datetime)
             api(libs.kermit)
         }
         commonTest.dependencies {

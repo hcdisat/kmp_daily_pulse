@@ -1,7 +1,8 @@
 package com.hcdisat.dailypulse.articles.di
 
-import com.hcdisat.dailypulse.articles.dataaccess.ArticleDataSource
+import com.hcdisat.dailypulse.articles.domain.ArticleDataSource
 import com.hcdisat.dailypulse.articles.dataaccess.network.RemoteArticleDataSource
+import com.hcdisat.dailypulse.articles.domain.usecase.GetArticleUseCase
 import com.hcdisat.dailypulse.articles.presentation.ArticlesViewModel
 import com.hcdisat.dailypulse.core.KermitKtorLogger
 import com.hcdisat.dailypulse.getPlatform
@@ -17,7 +18,9 @@ import org.koin.dsl.module
 val articlesModule = module {
     factory { providesHttpClient() }
     factory { providesArticleDataSource(get()) }
-    factoryOf(::ArticlesViewModel)
+    factoryOf(::GetArticleUseCase)
+
+    factory { ArticlesViewModel(get()) }
 }
 
 

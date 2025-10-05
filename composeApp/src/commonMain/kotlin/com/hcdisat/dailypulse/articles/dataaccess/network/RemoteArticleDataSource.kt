@@ -1,6 +1,6 @@
 package com.hcdisat.dailypulse.articles.dataaccess.network
 
-import com.hcdisat.dailypulse.articles.dataaccess.ArticleDataSource
+import com.hcdisat.dailypulse.articles.domain.ArticleDataSource
 import com.hcdisat.dailypulse.articles.domain.Article
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

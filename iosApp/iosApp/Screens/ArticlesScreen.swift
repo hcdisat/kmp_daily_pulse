@@ -67,7 +67,7 @@ struct ErrorView: View {
 }
 
 struct ArticleItemView: View {
-    var article: Article
+    var article: ArticleUI
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

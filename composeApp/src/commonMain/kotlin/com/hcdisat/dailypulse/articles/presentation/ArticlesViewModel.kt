@@ -2,48 +2,81 @@ package com.hcdisat.dailypulse.articles.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hcdisat.dailypulse.articles.dataaccess.ArticleDataSource
-import com.hcdisat.dailypulse.articles.domain.ArticlesState
+import com.hcdisat.dailypulse.articles.domain.Article
+import com.hcdisat.dailypulse.articles.domain.RelativeTimeFormatter
+import com.hcdisat.dailypulse.articles.domain.UseCaseResult
+import com.hcdisat.dailypulse.articles.domain.usecase.GetArticleUseCase
+import com.hcdisat.dailypulse.core.logger
+import com.hcdisat.dailypulse.core.toInstant
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class ArticlesViewModel(
-    private val dataSource: ArticleDataSource
+    getArticles: GetArticleUseCase,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
-    private val _articles = MutableStateFlow(ArticlesState())
-    val articles: StateFlow<ArticlesState> = _articles.asStateFlow()
-
-    init {
-        fetchArticles()
-    }
-
-    private fun fetchArticles() {
-        viewModelScope.launch {
-            startLoading()
-            withContext(Dispatchers.IO) { dataSource.fetchArticles() }.fold(
-                onSuccess = { articles ->
-                    _articles.update { it.copy(articles = articles) }
-                },
-                onFailure = { error ->
-                    _articles.update { it.copy(error = error.message) }
-                    throw error
-                }
-            )
-            stopLoading()
+    private val _articles = ArticlesState()
+    val articles: StateFlow<ArticlesState> = getArticles().distinctUntilChanged()
+        .map { result ->
+            when (result) {
+                is UseCaseResult.Error -> handleError(error = result)
+                is UseCaseResult.Loading -> handleLoading()
+                is UseCaseResult.Success<List<Article>> -> handleSuccess(result.data)
+            }
         }
+        .flowOn(dispatcher)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5.milliseconds.inWholeMilliseconds),
+            ArticlesState()
+        )
+
+    private fun handleSuccess(articles: List<Article>): ArticlesState {
+        return _articles.copy(articles = articles.map { it.toUI() }, isLoading = false, error = null)
     }
 
-    private fun startLoading() {
-        _articles.update { it.copy(isLoading = true) }
+    private fun handleLoading() = _articles.copy(isLoading = true, error = null)
+
+    private fun handleError(error: UseCaseResult.Error): ArticlesState {
+        logger().e(error.errorMessage, throwable = error.exception)
+        return _articles.copy(isLoading = false, error = error.errorMessage)
     }
 
-    private fun stopLoading() {
-        _articles.update { it.copy(isLoading = false) }
+    companion object {
+        @OptIn(ExperimentalTime::class)
+        private fun Article.toUI() = ArticleUI(
+            id = id,
+            title = title,
+            desc = description.orEmpty(),
+            date = publishedAt.toInstant().toRelativeTime(),
+            imageUrl = urlToImage.orEmpty()
+        )
+
+        @OptIn(ExperimentalTime::class)
+        private fun Instant.toRelativeTime() = RelativeTimeFormatter.format(this)
     }
 }
+
+data class ArticlesState(
+    val articles: List<ArticleUI> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
+data class ArticleUI(
+    val id: String,
+    val title: String,
+    val desc: String,
+    val date: String,
+    val imageUrl: String
+)
