@@ -1,0 +1,238 @@
+package com.hcdisat.dailypulse.articles.dataaccess
+
+import com.hcdisat.dailypulse.articles.dataaccess.network.NewsResponse
+import com.hcdisat.dailypulse.articles.dataaccess.network.toArticles
+import com.hcdisat.dailypulse.articles.domain.Article
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+
+object FakeArticleDataSource {
+    suspend fun fetchArticles(shouldFail: Boolean = false): Result<List<Article>> =
+        withContext(Dispatchers.Default) {
+            runCatching {
+                delay(500)
+                if (shouldFail) throw RuntimeException("Something went wrong")
+                val response = Json.decodeFromString<NewsResponse>(FAKE_RESPONSE)
+                response.toArticles()
+            }
+        }
+}
+
+private const val FAKE_RESPONSE = """
+    {
+  "status": "ok",
+  "totalResults": 35,
+  "articles": [
+    {
+      "source": {
+        "id": null,
+        "name": "BBC News"
+      },
+      "author": null,
+      "title": "Israel steps up deportations of flotilla activists - BBC",
+      "description": "Another 137 people from 14 countries were deported after being detained while trying to deliver aid to Gaza.",
+      "url": "https://www.bbc.com/news/articles/c701y9de2dro",
+      "urlToImage": "https://ichef.bbci.co.uk/news/1024/branded_news/2f81/live/c5b5cfe0-a050-11f0-b687-23a5afa8b42e.jpg",
+      "publishedAt": "2025-10-04T14:12:23Z",
+      "content": "Israel says it has deported another 137 activists detained when a flotilla trying to deliver aid to Gaza was intercepted this week.\r\nThe Israeli foreign ministry said those expelled on Saturday are c… [+2933 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "NPR"
+      },
+      "author": "",
+      "title": "Time is short for an ACA premium fix in the shutdown fight, says GOP insurance leader - NPR",
+      "description": "After warning Congress for months about premium spikes, the leader of the country's insurance commissioners — a Republican from North Dakota — says he's hopeful there could be a last minute fix.",
+      "url": "https://www.npr.org/sections/shots-health-news/2025/10/04/nx-s1-5562517/aca-obamacare-shutdown-trump-naic-health-insurance",
+      "urlToImage": "https://npr.brightspotcdn.com/dims3/default/strip/false/crop/5618x3160+0+0/resize/1400/quality/100/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2Fb5%2Fcb%2Ff241aa554525863b25cea8c5ece3%2Fgettyimages-2238590465.jpg",
+      "publishedAt": "2025-10-04T13:56:18Z",
+      "content": "On Capitol Hill right now, there's a partisan argument over if and when lawmakers need to act to extend subsidies for the Affordable Care Act marketplaces. That's where 24 million people who don't ha… [+4538 chars]"
+    },
+    {
+      "source": {
+        "id": "axios",
+        "name": "Axios"
+      },
+      "author": "Barak Ravid",
+      "title": "Trump tells Israel to stop bombing Gaza after Hamas responds to peace plan - Axios",
+      "description": "Hamas' response is, essentially, \"yes, but.\"",
+      "url": "https://www.axios.com/2025/10/03/hamas-respond-trump-plan-end-war-hostages",
+      "urlToImage": "https://images.axios.com/Jcu6w_iRRVF9b66B6Gcc1qPGOfk=/0x625:6000x4000/1366x768/2025/10/03/1759522779130.jpeg",
+      "publishedAt": "2025-10-04T13:48:42Z",
+      "content": "Driving the news: Hamas responded to Trump's Gaza peace plan with a \"yes, but.\" \r\n<ul><li>The group said it was willing to release all remaining hostages in return for an end to the war and a full Is… [+5859 chars]"
+    },
+    {
+      "source": {
+        "id": "associated-press",
+        "name": "Associated Press"
+      },
+      "author": "Marc Levy",
+      "title": "Abrego Garcia wins request for hearing on whether smuggling charges are illegally 'vindictive' - AP News",
+      "description": "A federal judge has concluded that the Department of Justice's prosecution of Kilmar Abrego Garcia on human smuggling charges could amount to illegal retaliation. U.S. District Court Judge Waverly Crenshaw late Friday granted a request by lawyers for Abrego G…",
+      "url": "https://apnews.com/article/immigration-deportation-abrego-garcia-asylum-el-salvador-trump-9fd6f91efd35ad929c5af5781d3442d7",
+      "urlToImage": "https://dims.apnews.com/dims4/default/90217eb/2147483647/strip/true/crop/3500x1969+0+182/resize/1440x810!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F28%2Fa0%2F81eb4237b0d2101a7afc6ce89481%2Febb7e8974734444e998f2fbddfe9bce8",
+      "publishedAt": "2025-10-04T13:42:00Z",
+      "content": "HARRISBURG, Pa. (AP) A federal judge has concluded that the Department of Justices prosecution of Kilmar Abrego Garcia on human smuggling charges may be an illegal retaliation after he successfully s… [+3424 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "AL.com"
+      },
+      "author": "Mark Heim | mheim@al.com",
+      "title": "Saban on Alabama-Vanderbilt: 'Revenge is not supposed to be a factor, but it is a factor today' - AL.com",
+      "description": "It didn't take long Saturday for former Alabama coach to issue warning.",
+      "url": "https://www.al.com/alabamafootball/2025/10/saban-on-alabama-vanderbilt-revenge-is-not-supposed-to-be-a-factor-but-it-is-a-factor-today.html",
+      "urlToImage": "https://www.al.com/resizer/v2/5OONG6QIGRCYLKNIVNKUUUWTKA.jpg?auth=5189d702783388de1ab5e3a7bfd95126f0aec2cd217a8de750c33fa6f6eac7c3&width=1280&smart=true&quality=90",
+      "publishedAt": "2025-10-04T13:33:00Z",
+      "content": "Nick Saban set the tone early Saturday during the opening moments of ESPNs College GameDay ahead of Alabamas game with Vanderbilt.\r\nLet me say one thing: Revenge is not supposed to be a factor, but i… [+1610 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "Pure Xbox"
+      },
+      "author": null,
+      "title": "Microsoft Set To Announce 'Free' Xbox Cloud Gaming Tier With Ads - Pure Xbox",
+      "description": null,
+      "url": "https://www.purexbox.com/news/2025/10/microsoft-set-to-announce-free-xbox-cloud-gaming-tier-with-ads",
+      "urlToImage": null,
+      "publishedAt": "2025-10-04T13:17:13Z",
+      "content": "Description: Group Number: Group Name: Ip Address: Username: Computer Name:"
+    },
+    {
+      "source": {
+        "id": "the-washington-post",
+        "name": "The Washington Post"
+      },
+      "author": "Naftali Bendavid, Yasmeen Abutaleb",
+      "title": "Democrats' defiance on shutdown shows a new, tougher approach to Trump - The Washington Post",
+      "description": "After eight months of getting battered by Republicans, the party has largely abandoned efforts at conciliation or outreach.",
+      "url": "https://www.washingtonpost.com/politics/2025/10/04/democrats-trump-shutdown-obamacare/",
+      "urlToImage": "https://www.washingtonpost.com/wp-apps/imrs.php?src=https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/Z5GSN3GF75HWKW46M6H6AUNLZA.JPG&w=1440",
+      "publishedAt": "2025-10-04T13:01:55Z",
+      "content": "After eight months of getting battered by Republicans, the party has largely abandoned efforts at conciliation or outreach.\r\nOctober 4, 2025 at 6:00 a.m. EDTJust now"
+    },
+    {
+      "source": {
+        "id": "associated-press",
+        "name": "Associated Press"
+      },
+      "author": "Adithi Ramakrishnan",
+      "title": "The first supermoon of the year is approaching. Here's what to know - AP News",
+      "description": "The first supermoon of the year is almost here. The moon will appear slightly larger and brighter on Monday. It's the first of three supermoons this year. This happens when the full moon is closer to Earth in its orbit. Supermoons occur a few times a year. Th…",
+      "url": "https://apnews.com/article/supermoon-october-2025-108f41b4fbd04335038c721b387aa6e1",
+      "urlToImage": "https://dims.apnews.com/dims4/default/a1ca002/2147483647/strip/true/crop/6154x3462+0+321/resize/1440x810!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2F94%2F26%2Fb3a0571183a5621c6b26f1d3d5df%2F048b9bd999e64ca0a54a1f29f072c79a",
+      "publishedAt": "2025-10-04T13:00:00Z",
+      "content": "NEW YORK (AP) The moon will appear slightly larger and brighter Monday night during whats known as a supermoon. \r\nOctobers supermoon is the first of three this year. It happens when a full moon is cl… [+1380 chars]"
+    },
+    {
+      "source": {
+        "id": "associated-press",
+        "name": "Associated Press"
+      },
+      "author": "Mark Sherman, Lindsay Whitehurst",
+      "title": "New Supreme Court term confronts justices with Trump's aggressive assertion of presidential power - AP News",
+      "description": "A monumental Supreme Court term is set to begin with major tests of presidential power on the agenda. There also are important cases on voting and the rights of LGBTQ people. The court's conservative majority has far been receptive, at least in preliminary ru…",
+      "url": "https://apnews.com/article/supreme-court-trump-lgbtq-tariffs-birthright-citizenship-6454b491b6b232ee424fe61823866bb4",
+      "urlToImage": "https://dims.apnews.com/dims4/default/6e6dc77/2147483647/strip/true/crop/6000x3375+0+312/resize/1440x810!/quality/90/?url=https%3A%2F%2Fassets.apnews.com%2Faa%2F0b%2F8b0ffaf610ae2c0bc6291a3980ff%2Fab7ad361050540b88486f51c97a52f1e",
+      "publishedAt": "2025-10-04T11:40:00Z",
+      "content": "WASHINGTON (AP) A monumental Supreme Court term begins Monday with major tests of presidential power on the agenda along with pivotal cases on voting and the rights of LGBTQ people.\r\nThe courts conse… [+6854 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "CBS Sports"
+      },
+      "author": "Will Backus",
+      "title": "College football picks: Predictions against the spread, odds, betting lines for top 25 games in Week 6 - CBS Sports",
+      "description": "A closer look at the top games for the sixth week of the 2025 college football season",
+      "url": "https://www.cbssports.com/college-football/news/college-football-picks-predictions-against-the-spread-odds-betting-lines-for-top-25-games-in-week-6/",
+      "urlToImage": "https://sportshub.cbsistatic.com/i/r/2025/10/03/142ed020-61ba-4239-aa99-441b6b37aeb9/thumbnail/1200x675/92d3fdfba7d26324ea73bef82da4eae4/carson-beck-t25-picks-1.jpg",
+      "publishedAt": "2025-10-04T11:40:00Z",
+      "content": "Though Week 6 of the 2025 college football season isn't loaded with ranked-on-ranked showdowns, there's no shortage of games that could shape the national picture. Six AP Top 25 teams will go on the … [+6795 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "NPR"
+      },
+      "author": "",
+      "title": "Here's how the fashion industry is using AI to predict the next big trend - NPR",
+      "description": "Once the province of elite fashion editors and forecasters, the art of figuring out what's likely to fly off future racks is getting an assist from AI algorithms.",
+      "url": "https://www.npr.org/2025/10/04/nx-s1-5561128/paris-fashion-week-ai-predict-trends",
+      "urlToImage": "https://npr.brightspotcdn.com/dims3/default/strip/false/crop/2400x1350+0+0/resize/1400/quality/100/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2Fe2%2F34%2F4ec2c6b145fa9ae64e05b8ab4b05%2F4-images-vertical-1.jpg",
+      "publishedAt": "2025-10-04T11:00:00Z",
+      "content": "Predicting what matters in fashion was once an elite sport, the province of those who attend those big runway shows in New York, Milan, London, and right now Paris, like the editors of influential ma… [+3716 chars]"
+    },
+    {
+      "source": {
+        "id": "cbs-news",
+        "name": "CBS News"
+      },
+      "author": null,
+      "title": "British police arrest 6 after deadly Manchester synagogue attack - CBS News",
+      "description": "Police have arrested six people on suspicion of terror offenses after an attack on a synagogue in northwest England.",
+      "url": "https://www.cbsnews.com/news/england-manchester-synagogue-attack-terror-offenses-arrests/",
+      "urlToImage": "https://assets1.cbsnewsstatic.com/hub/i/r/2025/10/04/a3287677-18c1-4964-9e8b-15ad115c06af/thumbnail/1200x630/5d5a317e234f96248cc0c8b50dd12ec3/ap25276431114853.jpg",
+      "publishedAt": "2025-10-04T10:57:00Z",
+      "content": "Police on Saturday were questioning six people arrested on suspicion of terror offenses after an attack on a synagogue in northwest England that left two men dead and Britain's Jewish community shock… [+3775 chars]"
+    },
+    {
+      "source": {
+        "id": "cnn",
+        "name": "CNN"
+      },
+      "author": "Lauren del Valle, Nicki Brown",
+      "title": "Sean 'Diddy' Combs was sentenced to over 4 years in prison after day-long court hearing. How we got here - CNN",
+      "description": "A federal judge sentenced Sean \"Diddy\" Combs to 4 years and 2 months in prison Friday afternoon, telling the disgraced music mogul that his crimes were serious but there is \"light at the end of the tunnel\" for him.",
+      "url": "https://www.cnn.com/2025/10/04/entertainment/sean-diddy-combs-was-sentenced-to-over-4-years-in-prison-after-an-arduous-day-in-court-how-we-got-here",
+      "urlToImage": "https://media.cnn.com/api/v1/images/stellar/prod/ap25276648039201-20251004025646515.jpg?c=16x9&q=w_800,c_fill",
+      "publishedAt": "2025-10-04T10:30:52Z",
+      "content": "A federal judge sentenced Sean Diddy Combs to four years and two months in prison Friday afternoon, telling the disgraced music mogul that his crimes were serious but there is light at the end of the… [+8862 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "Forbes"
+      },
+      "author": "Christopher Helman",
+      "title": "This Billionaire Built A $50 Million Golf Course So His Wife Had A Place To 'Swing Like An Idiot' - Forbes",
+      "description": "Forget the fancy Ferraris and precious Picassos. Instead, new Forbes 400 member David D. Halbert chose the ultimate flex: convincing Tom Fazio to build him a \"no-budget\" 18-hole golf course in Texas.",
+      "url": "https://www.forbes.com/sites/christopherhelman/2025/10/04/this-billionaire-built-a-50-million-golf-course-so-his-wife-had-a-place-to-swing-like-an-idiot/",
+      "urlToImage": "https://imageio.forbes.com/specials-images/imageserve/68dfe69ec6a1c8785d90dad3/0x0.jpg?format=jpg&height=900&width=1600&fit=bounds",
+      "publishedAt": "2025-10-04T10:30:00Z",
+      "content": "If you dont have a hole named after you then youre not a member, laughs David D. Halbert, as he pulls the cart up to the first tee at his personal golf course. This one is called the Jake hole becaus… [+10266 chars]"
+    },
+    {
+      "source": {
+        "id": null,
+        "name": "NPR"
+      },
+      "author": "The Associated Press",
+      "title": "Japan's ruling party elects Sanae Takaichi as leader, likely to become first female PM - NPR",
+      "description": "Japan's governing party on Saturday elected Sanae Takaichi, a hard-line ultra-conservative and China hawk, as its new leader, making her likely to become the country's first female prime minister.",
+      "url": "https://www.npr.org/2025/10/04/g-s1-92073/japans-sanae-takaichi-likely-to-become-first-female-pm",
+      "urlToImage": "https://npr.brightspotcdn.com/dims3/default/strip/false/crop/8000x4500+0+409/resize/1400/quality/100/format/jpeg/?url=http%3A%2F%2Fnpr-brightspot.s3.amazonaws.com%2F67%2Fa6%2F11af923e47358c628fc95e8205fc%2Fap25277244116644.jpg",
+      "publishedAt": "2025-10-04T10:17:39Z",
+      "content": "TOKYO Japan's governing party on Saturday elected former Economic Security Minister Sanae Takaichi, a hard-line ultra-conservative and China hawk, as its new leader, making her likely to become the c… [+4858 chars]"
+    },
+    {
+      "source": {
+        "id": "the-washington-post",
+        "name": "The Washington Post"
+      },
+      "author": "Rachel Zimmerman",
+      "title": "A high-schooler with hip pain, then a life-threatening diagnosis - The Washington Post",
+      "description": "One doctor told her the hip pain was a twisted pelvis. Another said the pain was just in her head.",
+      "url": "https://www.washingtonpost.com/health/2025/10/04/rare-medical-condition-spinal-cord/",
+      "urlToImage": "https://www.washingtonpost.com/wp-apps/imrs.php?src=https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/FGZIPVJI5BHL5GKLPLWTWTP7MQ.jpg&w=1440",
+      "publishedAt": "2025-10-04T10:08:57Z",
+      "content": "Lauren Casey was 15 and a tenor sax player in her Minnesota high school marching band when the pain in her hip and lower back became severe. It hurt when she walked and when she stood for hours at he… [+80 chars]"
+    }
+  ]
+}
+"""
