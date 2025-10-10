@@ -1,4 +1,4 @@
-package com.hcdisat.dailypulse
+package com.hcdisat.dailypulse.di
 
 import com.hcdisat.dailypulse.articles.presentation.ArticlesViewModel
 import org.koin.core.component.KoinComponent

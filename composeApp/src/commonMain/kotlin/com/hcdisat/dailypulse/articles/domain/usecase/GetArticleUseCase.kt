@@ -30,6 +30,6 @@ class GetArticleUseCase(private val dataSource: ArticleDataSource) {
     }
 
     companion object {
-        private const val DELAY_IN_MINUTES = 1
+        private const val DELAY_IN_MINUTES = 180
     }
 }

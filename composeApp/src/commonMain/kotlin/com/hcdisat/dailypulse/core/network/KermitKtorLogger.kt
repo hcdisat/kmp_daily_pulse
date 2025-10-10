@@ -1,4 +1,4 @@
-package com.hcdisat.dailypulse.core
+package com.hcdisat.dailypulse.core.network
 
 import io.ktor.client.plugins.logging.Logger
 

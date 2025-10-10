@@ -6,7 +6,7 @@ import com.hcdisat.dailypulse.articles.domain.Article
 import com.hcdisat.dailypulse.articles.domain.RelativeTimeFormatter
 import com.hcdisat.dailypulse.articles.domain.UseCaseResult
 import com.hcdisat.dailypulse.articles.domain.usecase.GetArticleUseCase
-import com.hcdisat.dailypulse.core.logger
+import com.hcdisat.dailypulse.core.network.logger
 import com.hcdisat.dailypulse.core.toInstant
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

@@ -1,4 +1,4 @@
-package com.hcdisat.dailypulse.articles
+package com.hcdisat.dailypulse.articles.presentation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,21 +23,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.hcdisat.dailypulse.AppScaffold
-import com.hcdisat.dailypulse.R
-import com.hcdisat.dailypulse.articles.presentation.ArticleUI
-import com.hcdisat.dailypulse.articles.presentation.ArticlesState
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
+import org.jetbrains.compose.ui.tooling.preview.PreviewParameterProvider
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +50,7 @@ fun ArticlesScreen(
         modifier = modifier.fillMaxSize(),
         toolbar = { Toolbar(onAboutClicked) }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = modifier.padding(paddingValues)) {
             if (isLoading) {
                 LoadingScreen()
             } else if (error != null) {
@@ -118,7 +116,7 @@ fun ArticleItem(article: ArticleUI) {
             modifier = Modifier.fillMaxWidth(),
             model = article.imageUrl,
             contentDescription = null,
-            placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+            placeholder = rememberVectorPainter(Icons.Outlined.Image),
             contentScale = ContentScale.Crop
         )
 

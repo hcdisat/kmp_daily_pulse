@@ -35,22 +35,24 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.navigation)
-            implementation(libs.bundles.koin.all)
-            implementation(compose.material3)
             implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
+            implementation(libs.androidx.navigation)
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.bundles.coil)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.bundles.ktor.core)
             implementation(libs.bundles.koin)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.material.icons.extended)
+            implementation(libs.compose.material3.adaptive)
             api(libs.kermit)
         }
         commonTest.dependencies {
@@ -96,14 +98,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
     debugImplementation(compose.uiTooling)
-    implementation(libs.coil.compose)
 }
 
 compose.desktop {

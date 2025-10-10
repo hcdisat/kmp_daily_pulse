@@ -9,8 +9,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.hcdisat.dailypulse.about.AboutScreen
-import com.hcdisat.dailypulse.articles.ArticlesScreen
+import com.hcdisat.dailypulse.about.AdaptiveAboutScreen
+import com.hcdisat.dailypulse.articles.presentation.ArticlesScreen
 import com.hcdisat.dailypulse.articles.presentation.ArticlesState
 import kotlinx.serialization.Serializable
 
@@ -58,7 +58,7 @@ fun AppNavHost(
         }
 
         composable<Route.AboutDevice> {
-            AboutScreen(onUpButtonClicked = { navController.popBackStack() })
+            AdaptiveAboutScreen(onUpButtonClicked = { navController.popBackStack() })
         }
     }
 }

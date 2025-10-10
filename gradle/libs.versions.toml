@@ -15,13 +15,15 @@ junit = "4.13.2"
 kotlin = "2.2.10"
 kotlinx-coroutines = "1.10.2"
 
-coilCompose = "2.7.0"
+coilCompose = "3.3.0"
 kotlinxDatetime = "0.7.1"
+materialIconsExtended = "1.7.3"
 skie = "0.10.6"
 kermit = "2.0.4"
 composeNavigation = "2.9.0"
 koin = "4.1.1"
 ktor = "3.3.0"
+composeMaterial3Adaptive = "1.2.0-alpha06"
 
 
 [libraries]
@@ -37,7 +39,9 @@ androidx-lifecycle-viewmodelCompose = { module = "org.jetbrains.androidx.lifecyc
 androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
+coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coilCompose" }
 androidx-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -55,6 +59,8 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+compose-material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "composeMaterial3Adaptive" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -75,4 +81,9 @@ ktor-core = [
     "ktor-client-logging",
     "ktor-client-content-negotiation",
     "ktor-client-content-serialization-kotlinx-json"
+]
+coil = [
+    "coil-compose-core",
+    "coil-compose",
+    "coil-ktor"
 ]
