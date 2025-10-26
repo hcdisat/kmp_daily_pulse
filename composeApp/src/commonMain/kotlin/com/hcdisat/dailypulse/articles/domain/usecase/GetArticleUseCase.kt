@@ -1,35 +1,25 @@
 package com.hcdisat.dailypulse.articles.domain.usecase
 
 import com.hcdisat.dailypulse.articles.domain.Article
-import com.hcdisat.dailypulse.articles.domain.ArticleDataSource
+import com.hcdisat.dailypulse.articles.domain.ArticleRepository
 import com.hcdisat.dailypulse.articles.domain.UseCaseResult
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
-class GetArticleUseCase(private val dataSource: ArticleDataSource) {
+class GetArticleUseCase(private val repository: ArticleRepository) {
 
-    operator fun invoke(): Flow<UseCaseResult<List<Article>>> = fetchArticles()
-
-    private fun fetchArticles(): Flow<UseCaseResult<List<Article>>> = flow {
-        while (true) {
-            emit(UseCaseResult.Loading)
-            dataSource.fetchArticles()
-                .onSuccess { articles ->
-                    articles
-                        .sortedByDescending { it.publishedAt }
-                        .also { emit(UseCaseResult.Success(it)) }
-                }
-                .onFailure {
+    operator fun invoke(): Flow<UseCaseResult<List<Article>>> =
+        repository.fetchArticles()
+            .map { articles ->
+                val sortedArticles = articles.sortedByDescending { it.publishedAt }
+                UseCaseResult.Success(sortedArticles) as UseCaseResult<List<Article>>
+            }
+            .onStart { emit(UseCaseResult.Loading) }
+            .catch {
+                emit(
                     UseCaseResult.Error(it.message.orEmpty(), it)
-                }
-
-            delay(DELAY_IN_MINUTES.minutes)
-        }
-    }
-
-    companion object {
-        private const val DELAY_IN_MINUTES = 180
-    }
+                )
+            }
 }

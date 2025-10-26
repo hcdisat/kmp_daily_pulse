@@ -9,7 +9,10 @@ plugins {
     alias(libs.plugins.composeHotReload)
     alias(libs.plugins.skie)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.sqldelight)
 }
+
+val appPackageName = "com.hcdisat.dailypulse"
 
 kotlin {
     androidTarget {
@@ -36,6 +39,8 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.navigation)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.sqldelight.android)
+            implementation(libs.kermit)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,7 +58,9 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.material.icons.extended)
             implementation(libs.compose.material3.adaptive)
-            api(libs.kermit)
+            implementation(libs.sqldelight.coroutines)
+            implementation(libs.kermit)
+            implementation(libs.kotlinx.collections.immutable)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -62,9 +69,11 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(libs.ktor.client.cio)
+            implementation(libs.sqldelight)
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.sqldelight.native)
         }
     }
 }
@@ -76,11 +85,11 @@ skie {
 }
 
 android {
-    namespace = "com.hcdisat.dailypulse"
+    namespace = appPackageName
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "com.hcdisat.dailypulse"
+        applicationId = appPackageName
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -109,12 +118,20 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "com.hcdisat.dailypulse.MainKt"
+        mainClass = "$appPackageName.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.hcdisat.dailypulse"
+            packageName = appPackageName
             packageVersion = "1.0.0"
+        }
+    }
+}
+
+sqldelight {
+    databases {
+        create("DailyPulseDatabase") {
+            packageName.set("$appPackageName.database")
         }
     }
 }

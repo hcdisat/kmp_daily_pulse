@@ -1,5 +1,6 @@
 package com.hcdisat.dailypulse.articles.presentation
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,7 +23,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -32,6 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.hcdisat.dailypulse.AppScaffold
+import com.hcdisat.dailypulse.Route
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameter
 import org.jetbrains.compose.ui.tooling.preview.PreviewParameterProvider
@@ -41,22 +53,23 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun ArticlesScreen(
     modifier: Modifier = Modifier,
-    articles: List<ArticleUI> = emptyList(),
+    articles: ImmutableList<ArticleUI> = persistentListOf(),
     error: String? = null,
     isLoading: Boolean = false,
-    onAboutClicked: () -> Unit = {}
+    isRefreshing: Boolean = true,
+    onRouteAction: (Route.Articles.RouteAction) -> Unit = {},
 ) {
     AppScaffold(
         modifier = modifier.fillMaxSize(),
-        toolbar = { Toolbar(onAboutClicked) }
+        toolbar = { Toolbar { onRouteAction(it) } }
     ) { paddingValues ->
-        Box(modifier = modifier.padding(paddingValues)) {
-            if (isLoading) {
-                LoadingScreen()
-            } else if (error != null) {
-                ErrorScreen(message = error)
-            } else {
-                ArticleList(articles = articles)
+        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            when {
+                isLoading -> LoadingScreen()
+                error != null -> ErrorScreen(message = error)
+                else -> ArticleList(articles = articles, isRefreshing = isRefreshing) {
+                    onRouteAction(Route.Articles.RouteAction.Refresh)
+                }
             }
         }
     }
@@ -64,13 +77,26 @@ fun ArticlesScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Toolbar(onAboutClicked: () -> Unit = {}) {
+private fun Toolbar(navigateTo: (Route.Articles.RouteAction) -> Unit = {}) {
     TopAppBar(
         title = { Text(text = "Articles") },
         actions = {
-            IconButton(onAboutClicked) {
-                Icon(Icons.Outlined.Info, contentDescription = "About")
-            }
+            IconButton(
+                onClick = { navigateTo(Route.Articles.RouteAction.NavigateToAbout) },
+                content = {
+                    Icon(Icons.Outlined.Info, contentDescription = "About")
+                }
+            )
+
+            IconButton(
+                onClick = { navigateTo(Route.Articles.RouteAction.NavigateToSources) },
+                content = {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "Configure Sources"
+                    )
+                }
+            )
         }
     )
 }
@@ -97,10 +123,70 @@ private fun ErrorScreen(modifier: Modifier = Modifier, message: String) {
 }
 
 @Composable
-private fun ArticleList(modifier: Modifier = Modifier, articles: List<ArticleUI>) {
-    LazyColumn(modifier = modifier.fillMaxSize()) {
-        items(articles) { article ->
-            ArticleItem(article = article)
+@Preview(showBackground = true)
+private fun EmptyScreen(modifier: Modifier = Modifier, onRefresh: () -> Unit = {}) {
+    var isLoading by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "No articles found",
+                style = TextStyle(fontSize = 28.sp, textAlign = TextAlign.Center)
+            )
+
+            Text(
+                text = "No articles found on any sources at the moment. You can refresh below",
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Button(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                onClick = {
+                    isLoading = true
+                    onRefresh()
+                },
+                enabled = !isLoading
+            ) {
+                Text(text = "Refresh")
+
+                if (isLoading) {
+                    Spacer(Modifier.width(24.dp))
+
+                    CircularProgressIndicator(
+                        modifier = Modifier.width(24.dp).height(24.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ArticleList(
+    modifier: Modifier = Modifier,
+    articles: ImmutableList<ArticleUI>,
+    isRefreshing: Boolean = false,
+    onPullToRefresh: () -> Unit = {},
+) {
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onPullToRefresh,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        if (articles.isEmpty()) {
+            EmptyScreen { onPullToRefresh() }
+        } else {
+            LazyColumn(modifier = modifier.fillMaxSize()) {
+                items(articles) { article ->
+                    ArticleItem(article = article)
+                }
+            }
         }
     }
 }
@@ -151,12 +237,13 @@ fun ArticleItem(article: ArticleUI) {
 fun ArticlesScreenPreview(
     @PreviewParameter(ArticlesStateProvider::class) articleState: ArticlesState
 ) {
-    val (articles, isLoading, error) = articleState
+    val (articles, isLoading, isRefreshing, error) = articleState
     MaterialTheme {
         ArticlesScreen(
-            articles = articles,
+            articles = articles.toPersistentList(),
             error = error,
-            isLoading = isLoading
+            isLoading = isLoading,
+            isRefreshing = isRefreshing
         )
     }
 }
@@ -166,11 +253,13 @@ class ArticlesStateProvider : PreviewParameterProvider<ArticlesState> {
         get() = sequenceOf(
             ArticlesState(articles = fakeArticles),
             ArticlesState(isLoading = true),
-            ArticlesState(error = "Failed to load articles")
+            ArticlesState(isRefreshing = true),
+            ArticlesState(error = "Failed to load articles"),
+            ArticlesState(articles = persistentListOf())
         )
 
     companion object {
-        private val fakeArticles = listOf(
+        private val fakeArticles = persistentListOf(
             ArticleUI(
                 id = "1",
                 title = "The Future of Quantum Computing",

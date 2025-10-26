@@ -20,7 +20,7 @@ struct ArticlesScreen: View {
         Observing(viewModel.articles) { state in
             VStack {
                 AppBar()
-            
+                
                 if state.isLoading {
                     Loader()
                 }
@@ -38,7 +38,15 @@ struct ArticlesScreen: View {
                             }
                         }
                     }
+                } else {
+                    EmptyArticleView(onRefresh: {
+                        viewModel.onEvent(action: .Refresh())
+                    })
                 }
+                
+                Spacer()
+            }.refreshable {
+                viewModel.onEvent(action: .Refresh())
             }
         }
     }
@@ -95,6 +103,57 @@ struct ArticleItemView: View {
     }
 }
 
+
+private struct EmptyArticleView: View {
+    
+    @State var isLoading: Bool = false
+    
+    var onRefresh: () -> Void = { }
+    
+    var body: some View {
+        VStack {
+            Spacer()
+            
+            Text("No articles found")
+                .font(.title)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Text("No articles found on any sources at the moment. You can refresh below")
+                .font(.system(size: 16, design: .default))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Button {
+                guard !isLoading else { return }
+                
+                isLoading = true
+                onRefresh()
+                
+            } label: {
+                HStack {
+                    Text("Refresh")
+                    ProgressView().opacity(isLoading ? 1 : 0)
+                }
+            }
+            .disabled(isLoading)
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                    )
+            )
+            
+            Spacer()
+            Spacer()
+                
+        }.padding([.leading, .trailing], 16)
+    }
+}
+
 #Preview {
     ArticlesScreen()
 }
+

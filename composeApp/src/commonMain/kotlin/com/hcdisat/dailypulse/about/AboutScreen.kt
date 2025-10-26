@@ -7,16 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +23,7 @@ import com.hcdisat.dailypulse.AppScaffold
 import com.hcdisat.dailypulse.core.presentation.WindowInfo
 import com.hcdisat.dailypulse.core.presentation.rememberWindowInfo
 import com.hcdisat.dailypulse.getPlatform
+import com.hcdisat.dailypulse.sources.presentation.Toolbar
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +44,7 @@ private fun AdaptiveAboutScreen(
     onUpButtonClicked: () -> Unit = {}
 ) {
     AppScaffold(
-        toolbar = { Toolbar(onUpButtonClicked) }
+        toolbar = { Toolbar("About Device", onUpButtonClicked) }
     ) { paddingValues ->
         Surface(modifier = Modifier.padding(paddingValues)) {
             when (windowInfo.widthInfo) {
@@ -58,22 +54,6 @@ private fun AdaptiveAboutScreen(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun Toolbar(onUpButtonClicked: () -> Unit = {}) {
-    TopAppBar(
-        title = { Text(text = "About Device") },
-        navigationIcon = {
-            IconButton(onUpButtonClicked) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = "Up Button"
-                )
-            }
-        }
-    )
 }
 
 @Composable

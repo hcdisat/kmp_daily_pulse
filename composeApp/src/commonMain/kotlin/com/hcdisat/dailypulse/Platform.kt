@@ -1,8 +1,14 @@
+@file:Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+
 package com.hcdisat.dailypulse
 
+import app.cash.sqldelight.db.SqlDriver
 import io.ktor.client.engine.HttpClientEngine
 
-@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+expect class DriverFactory {
+    fun createDriver(): SqlDriver
+}
+
 expect class Platform {
     val osName: String
     val osVersion: String

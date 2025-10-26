@@ -12,8 +12,8 @@ data class Article(
     val urlToImage: String?
 )
 
-sealed class UseCaseResult<out T> {
-    data class Success<T>(val data: T) : UseCaseResult<T>()
-    data class Error(val errorMessage: String, val exception: Throwable) : UseCaseResult<Nothing>()
-    data object Loading : UseCaseResult<Nothing>()
+sealed interface UseCaseResult<out T> {
+    data class Success<T>(val data: T) : UseCaseResult<T>
+    data class Error(val errorMessage: String, val exception: Throwable) : UseCaseResult<Nothing>
+    data object Loading : UseCaseResult<Nothing>
 }

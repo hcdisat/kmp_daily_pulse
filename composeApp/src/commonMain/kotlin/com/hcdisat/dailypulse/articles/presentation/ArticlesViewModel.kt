@@ -6,50 +6,86 @@ import com.hcdisat.dailypulse.articles.domain.Article
 import com.hcdisat.dailypulse.articles.domain.RelativeTimeFormatter
 import com.hcdisat.dailypulse.articles.domain.UseCaseResult
 import com.hcdisat.dailypulse.articles.domain.usecase.GetArticleUseCase
-import com.hcdisat.dailypulse.core.network.logger
+import com.hcdisat.dailypulse.articles.domain.usecase.RefreshArticlesUseCase
+import com.hcdisat.dailypulse.articles.domain.usecase.TransactionHandlerUseCase
+import com.hcdisat.dailypulse.core.dataaccess.network.logger
 import com.hcdisat.dailypulse.core.toInstant
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 class ArticlesViewModel(
     getArticles: GetArticleUseCase,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO
+    transactionHandler: TransactionHandlerUseCase,
+    private val refreshDbArticles: RefreshArticlesUseCase,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
-    private val _articles = ArticlesState()
-    val articles: StateFlow<ArticlesState> = getArticles().distinctUntilChanged()
-        .map { result ->
+    private val _articles = MutableStateFlow(ArticlesState())
+    val articles: StateFlow<ArticlesState> = _articles.asStateFlow()
+
+    init {
+        transactionHandler()
+            .onEach { logger().d("$it") }
+            .flowOn(dispatcher)
+            .launchIn(viewModelScope)
+
+        getArticles().onEach { result ->
+            logger().d("$result")
             when (result) {
                 is UseCaseResult.Error -> handleError(error = result)
                 is UseCaseResult.Loading -> handleLoading()
                 is UseCaseResult.Success<List<Article>> -> handleSuccess(result.data)
             }
-        }
-        .flowOn(dispatcher)
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5.milliseconds.inWholeMilliseconds),
-            ArticlesState()
-        )
-
-    private fun handleSuccess(articles: List<Article>): ArticlesState {
-        return _articles.copy(articles = articles.map { it.toUI() }, isLoading = false, error = null)
+        }.flowOn(dispatcher)
+            .launchIn(viewModelScope)
     }
 
-    private fun handleLoading() = _articles.copy(isLoading = true, error = null)
+    fun onEvent(action: ArticleAction) {
+        when (action) {
+            ArticleAction.Refresh -> refreshArticles()
+        }
+    }
 
-    private fun handleError(error: UseCaseResult.Error): ArticlesState {
+    private fun refreshArticles() {
+        _articles.update { it.copy(isRefreshing = true) }
+        viewModelScope.launch(dispatcher) { refreshDbArticles() }
+    }
+
+    private fun handleSuccess(articles: List<Article>) = _articles.update {
+        it.copy(
+            articles = articles.map { article -> article.toUI() }.toPersistentList(),
+            isLoading = false,
+            isRefreshing = false,
+            error = null
+        )
+    }
+
+    private fun handleLoading() = _articles.update {
+        it.copy(isLoading = true, error = null)
+    }
+
+    private fun handleError(error: UseCaseResult.Error) {
         logger().e(error.errorMessage, throwable = error.exception)
-        return _articles.copy(isLoading = false, error = error.errorMessage)
+        return _articles.update {
+            it.copy(
+                isLoading = false,
+                isRefreshing = false,
+                error = error.errorMessage
+            )
+        }
     }
 
     companion object {
@@ -68,8 +104,9 @@ class ArticlesViewModel(
 }
 
 data class ArticlesState(
-    val articles: List<ArticleUI> = emptyList(),
+    val articles: ImmutableList<ArticleUI> = persistentListOf(),
     val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
     val error: String? = null
 )
 
@@ -80,3 +117,7 @@ data class ArticleUI(
     val date: String,
     val imageUrl: String
 )
+
+sealed class ArticleAction {
+    data object Refresh : ArticleAction()
+}
