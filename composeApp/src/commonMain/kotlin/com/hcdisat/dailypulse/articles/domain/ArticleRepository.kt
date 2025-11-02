@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.SharedFlow
 interface ArticleRepository {
     val transactionResult: SharedFlow<DatabaseTransactionResult>
     fun fetchArticles(): Flow<List<Article>>
-    suspend fun updateArticles()
+    suspend fun updateArticles(source: String)
     suspend fun removeAll()
 }
 

@@ -1,12 +1,19 @@
-package com.hcdisat.dailypulse.sources.dataaccess.database
+package com.hcdisat.dailypulse.core.dataaccess.database
 
 import app.cash.sqldelight.coroutines.asFlow
 import com.hcdisat.dailypulse.core.model.NewsCategory
 import com.hcdisat.dailypulse.database.DailyPulseDatabase
+import kotlinx.coroutines.coroutineScope
 
 class NewsSourcesDataSource(private val database: DailyPulseDatabase) {
 
-    fun getSourceConfig() = database.articleQueries.selectSourceConfig().asFlow()
+    fun getSourceConfigFlow() = database.articleQueries.selectSourceConfig().asFlow()
+
+    suspend fun getSources() = coroutineScope {
+        database.articleQueries.selectSourceConfig()
+            .executeAsList()
+            .map { it.sourceId }
+    }
 
     fun updateCategory(category: NewsCategory) {
         database.transaction {

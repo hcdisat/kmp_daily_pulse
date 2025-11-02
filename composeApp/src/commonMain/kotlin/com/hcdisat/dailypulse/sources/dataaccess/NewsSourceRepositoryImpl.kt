@@ -3,7 +3,7 @@ package com.hcdisat.dailypulse.sources.dataaccess
 import com.hcdisat.dailypulse.core.dataaccess.network.NewsApiDataSource
 import com.hcdisat.dailypulse.core.model.NewsCategory
 import com.hcdisat.dailypulse.database.SourceSetting
-import com.hcdisat.dailypulse.sources.dataaccess.database.NewsSourcesDataSource
+import com.hcdisat.dailypulse.core.dataaccess.database.NewsSourcesDataSource
 import com.hcdisat.dailypulse.sources.dataaccess.model.NewsSource
 import com.hcdisat.dailypulse.sources.domain.NewsSourceRepository
 import com.hcdisat.dailypulse.sources.domain.model.Source
@@ -18,7 +18,7 @@ class NewsSourceRepositoryImpl(
     private val newsApi: NewsApiDataSource
 ) : NewsSourceRepository {
     override fun getSourceConfig(): Flow<SourceConfig> =
-        dataSource.getSourceConfig().map { it.executeAsList() }
+        dataSource.getSourceConfigFlow().map { it.executeAsList() }
             .mapNotNull { sourceConfig ->
                 sourceConfig
                     .filter { it.id == 1L }

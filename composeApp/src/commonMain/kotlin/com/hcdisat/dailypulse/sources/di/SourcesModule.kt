@@ -1,7 +1,6 @@
 package com.hcdisat.dailypulse.sources.di
 
 import com.hcdisat.dailypulse.sources.dataaccess.NewsSourceRepositoryImpl
-import com.hcdisat.dailypulse.sources.dataaccess.database.NewsSourcesDataSource
 import com.hcdisat.dailypulse.sources.domain.NewsSourceRepository
 import com.hcdisat.dailypulse.sources.domain.usecase.GetSourceConfigUseCase
 import com.hcdisat.dailypulse.sources.domain.usecase.LoadNewsSourcesUseCase
@@ -13,18 +12,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val sourcesModule = module {
     factoryOf(::NewsSourceViewModel)
 
-    singleOf(::NewsSourcesDataSource)
-    single<NewsSourceRepository> {
-        NewsSourceRepositoryImpl(
-            dataSource = get(),
-            newsApi = get()
-        )
-    }
+    singleOf(::NewsSourceRepositoryImpl).bind<NewsSourceRepository>()
 
     factoryOf(::GetSourceConfigUseCase)
     factoryOf(::UpdateCategoryUseCase)

@@ -4,10 +4,10 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.hcdisat.dailypulse.articles.dataaccess.database.DatabaseArticleDataSource
 import com.hcdisat.dailypulse.articles.dataaccess.database.toDomainArticle
 import com.hcdisat.dailypulse.articles.dataaccess.network.toArticles
-import com.hcdisat.dailypulse.core.dataaccess.network.NewsApiDataSource
 import com.hcdisat.dailypulse.articles.domain.Article
 import com.hcdisat.dailypulse.articles.domain.ArticleRepository
 import com.hcdisat.dailypulse.articles.domain.DatabaseTransactionResult
+import com.hcdisat.dailypulse.core.dataaccess.network.NewsApiDataSource
 import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
@@ -50,8 +50,8 @@ class ArticleRepositoryImpl(
         .map { it.executeAsList() }
         .map { dbArticle -> dbArticle.map { it.toDomainArticle() } }
 
-    override suspend fun updateArticles() {
-        remoteDataSource.fetchArticles()
+    override suspend fun updateArticles(source: String) {
+        remoteDataSource.fetchArticles(source)
             .mapCatching { it.toArticles() }
             .mapCatching { articles ->
                 localDataSource.removeAll()
